@@ -1,0 +1,12 @@
+# Imagen base
+FROM mysql:5.7
+
+# Variables de entorno
+ENV MYSQL_ROOT_PASSWORD=root
+ENV MYSQL_DATABASE=accwe-hospital
+
+# Exponer el puerto de MySQL
+EXPOSE 3306
+
+# Iniciar el contenedor
+CMD ["mysqld", "--bind-address=172.17.0.2"]
