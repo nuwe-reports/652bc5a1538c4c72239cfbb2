@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 
+/**
+ * AppointmentController
+ */
+
 @RestController
 @RequestMapping("/api")
 public class AppointmentController {
@@ -26,6 +30,9 @@ public class AppointmentController {
     @Autowired
     AppointmentRepository appointmentRepository;
 
+    /**
+     * @return List<Appointment>
+     */
     @GetMapping("/appointments")
     public ResponseEntity<List<Appointment>> getAllAppointments() {
         List<Appointment> appointments = new ArrayList<>();
@@ -39,6 +46,10 @@ public class AppointmentController {
         return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
 
+    /**
+     * @param id
+     * @return Appointment
+     */
     @GetMapping("/appointments/{id}")
     public ResponseEntity<Appointment> getAppointmentById(@PathVariable("id") long id) {
         Optional<Appointment> appointment = appointmentRepository.findById(id);
@@ -50,26 +61,30 @@ public class AppointmentController {
         }
     }
 
+    /**
+     * @param newAppointment
+     * @return List<Appointment>
+     */
     @PostMapping("/appointment")
     public ResponseEntity<List<Appointment>> createAppointment(@RequestBody Appointment newAppointment) {
-        List<Appointment> appointments = new ArrayList<>();
-        List<Appointment> existingAppointments = appointmentRepository.findAll();
-
         if (isInvalidTimeRange(newAppointment)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (hasOverlap(existingAppointments, newAppointment)) {
+        if (hasOverlap(newAppointment)) {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
 
         appointmentRepository.save(newAppointment);
-        appointmentRepository.findAll().forEach(appointments::add);
+        List<Appointment> appointments = appointmentRepository.findAll();
 
         return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
 
-
+    /**
+     * @param id
+     * @return HttpStatus
+     */
     @DeleteMapping("/appointments/{id}")
     public ResponseEntity<HttpStatus> deleteAppointment(@PathVariable("id") long id) {
 
@@ -85,17 +100,29 @@ public class AppointmentController {
 
     }
 
+    /**
+     * @return HttpStatus
+     */
     @DeleteMapping("/appointments")
     public ResponseEntity<HttpStatus> deleteAllAppointments() {
         appointmentRepository.deleteAll();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    /**
+     * @param appointment
+     * @return boolean
+     */
     private boolean isInvalidTimeRange(Appointment appointment) {
         return appointment.getStartsAt().equals(appointment.getFinishesAt());
     }
 
-    private boolean hasOverlap(List<Appointment> existingAppointments, Appointment newAppointment) {
+    /**
+     * @param newAppointment
+     * @return boolean
+     */
+    private boolean hasOverlap(Appointment newAppointment) {
+        List<Appointment> existingAppointments = appointmentRepository.findAll();
         for (Appointment existingAppointment : existingAppointments) {
             if (newAppointment.overlaps(existingAppointment)) {
                 return true;
