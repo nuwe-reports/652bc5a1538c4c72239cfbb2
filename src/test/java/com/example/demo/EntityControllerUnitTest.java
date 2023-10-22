@@ -43,29 +43,35 @@ class DoctorControllerUnitTest {
     private ObjectMapper objectMapper;
 
     /**
-     * Method under test: {@link DoctorController#createDoctor(Doctor)}
+     * Creates a sample Doctor object
+     *
+     * @return a Doctor object
      */
-    @Test
-    void testCreateDoctor() throws Exception {
+    private Doctor createSampleDoctor() {
         Doctor doctor = new Doctor();
         doctor.setAge(30);
         doctor.setEmail("guillermo@gmail.com");
         doctor.setFirstName("Guillermo");
         doctor.setId(1L);
         doctor.setLastName("Santisteban");
+        return doctor;
+    }
+
+    /**
+     * Method under test: {@link DoctorController#createDoctor(Doctor)}
+     */
+    @Test
+    void testCreateDoctor() throws Exception {
+        Doctor doctor = createSampleDoctor();
 
         when(doctorRepository.save(Mockito.<Doctor>any())).thenReturn(doctor);
 
-        Doctor doctor2 = new Doctor();
-        doctor2.setAge(28);
-        doctor2.setEmail("gisselle@gmail.com");
-        doctor2.setFirstName("Gisselle");
-        doctor2.setLastName("Montenegro");
-        doctor2.setId(2L);
+        Doctor newDoctor = createSampleDoctor();
+        newDoctor.setId(2L);
 
         mockMvc.perform(post("/api/doctor")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(doctor2)))
+                        .content(objectMapper.writeValueAsString(newDoctor)))
                 .andExpect(status().isCreated());
     }
 
@@ -84,12 +90,7 @@ class DoctorControllerUnitTest {
      */
     @Test
     void testDeleteDoctor() throws Exception {
-        Doctor doctor = new Doctor();
-        doctor.setAge(30);
-        doctor.setEmail("guillermo@gmail.com");
-        doctor.setFirstName("Guillermo");
-        doctor.setId(1L);
-        doctor.setLastName("Santisteban");
+        Doctor doctor = createSampleDoctor();
 
         Optional<Doctor> opt = Optional.of(doctor);
 
@@ -132,12 +133,7 @@ class DoctorControllerUnitTest {
      */
     @Test
     void testGetAllDoctors() throws Exception {
-        Doctor doctor = new Doctor();
-        doctor.setAge(30);
-        doctor.setEmail("guillermo@gmail.com");
-        doctor.setFirstName("Guillermo");
-        doctor.setId(1L);
-        doctor.setLastName("Santisteban");
+        Doctor doctor = createSampleDoctor();
 
         List<Doctor> doctors = new ArrayList<>();
         doctors.add(doctor);
@@ -153,12 +149,7 @@ class DoctorControllerUnitTest {
      */
     @Test
     void testGetDoctorById() throws Exception {
-        Doctor doctor = new Doctor();
-        doctor.setAge(30);
-        doctor.setEmail("guillermo@gmail.com");
-        doctor.setFirstName("Guillermo");
-        doctor.setId(1L);
-        doctor.setLastName("Santisteban");
+        Doctor doctor = createSampleDoctor();
 
         Optional<Doctor> opt = Optional.of(doctor);
 
@@ -198,24 +189,29 @@ class PatientControllerUnitTest {
     private ObjectMapper objectMapper;
 
     /**
-     * Method under test: {@link PatientController#createPatient(Patient)}
+     * Creates a sample Patient object
+     * @return a Patient object
      */
-    @Test
-    void testCreatePatient() throws Exception {
+    private Patient createSamplePatient() {
         Patient patient = new Patient();
         patient.setAge(30);
         patient.setEmail("guillermo@gmail.com");
         patient.setFirstName("Guillermo");
         patient.setId(1L);
         patient.setLastName("Santisteban");
+        return patient;
+    }
+
+    /**
+     * Method under test: {@link PatientController#createPatient(Patient)}
+     */
+    @Test
+    void testCreatePatient() throws Exception {
+        Patient patient = createSamplePatient();
         when(patientRepository.save(Mockito.<Patient>any())).thenReturn(patient);
 
-        Patient patient2 = new Patient();
-        patient2.setAge(28);
-        patient2.setEmail("gisselle@gmail.com");
-        patient2.setFirstName("Gisselle");
-        patient2.setId(1L);
-        patient2.setLastName("Montenegro");
+        Patient patient2 = createSamplePatient();
+        patient2.setId(2L);
 
         mockMvc.perform(post("/api/patient")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -238,12 +234,7 @@ class PatientControllerUnitTest {
      */
     @Test
     void testDeletePatient() throws Exception {
-        Patient patient = new Patient();
-        patient.setAge(30);
-        patient.setEmail("guillermo@gmail.com");
-        patient.setFirstName("Guillermo");
-        patient.setId(1L);
-        patient.setLastName("Santisteban");
+        Patient patient = createSamplePatient();;
 
         Optional<Patient> opt = Optional.of(patient);
 
@@ -286,12 +277,7 @@ class PatientControllerUnitTest {
      */
     @Test
     void testGetAllPatients() throws Exception {
-        Patient patient = new Patient();
-        patient.setAge(30);
-        patient.setEmail("guillermo@gmail.com");
-        patient.setFirstName("Guillermo");
-        patient.setId(1L);
-        patient.setLastName("Santisteban");
+        Patient patient = createSamplePatient();
 
         List<Patient> patients = new ArrayList<>();
         patients.add(patient);
@@ -307,12 +293,7 @@ class PatientControllerUnitTest {
      */
     @Test
     void testGetPatientById() throws Exception {
-        Patient patient = new Patient();
-        patient.setAge(30);
-        patient.setEmail("guillermo@gmail.com");
-        patient.setFirstName("Guillermo");
-        patient.setId(1L);
-        patient.setLastName("Santisteban");
+        Patient patient = createSamplePatient();
 
         Optional<Patient> opt = Optional.of(patient);
 
@@ -352,11 +333,20 @@ class RoomControllerUnitTest {
     private ObjectMapper objectMapper;
 
     /**
+     * Creates a sample Room object
+     * @return a Room object
+     */
+    private Room createSampleRoom() {
+        Room room = new Room("Sala 01");
+        return room;
+    }
+
+    /**
      * Method under test: {@link RoomController#createRoom(Room)}
      */
     @Test
     void testCreateRoom() throws Exception {
-        Room room = new Room("Sala 01");
+        Room room = createSampleRoom();
 
         when(roomRepository.save(Mockito.<Room>any())).thenReturn(room);
 
@@ -383,7 +373,7 @@ class RoomControllerUnitTest {
      */
     @Test
     void testDeleteRoom() throws Exception {
-        Room room = new Room("Sala 01");
+        Room room = createSampleRoom();
 
         Optional<Room> opt = Optional.of(room);
 
@@ -426,7 +416,7 @@ class RoomControllerUnitTest {
      */
     @Test
     void testGetAllRooms() throws Exception {
-        Room room = new Room("Sala 01");
+        Room room = createSampleRoom();
 
         List<Room> rooms = new ArrayList<>();
         rooms.add(room);
@@ -442,7 +432,7 @@ class RoomControllerUnitTest {
      */
     @Test
     void testGetRoomByRoomName() throws Exception {
-        Room room = new Room("Sala 01");
+        Room room = createSampleRoom();
 
         Optional<Room> opt = Optional.of(room);
 

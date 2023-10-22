@@ -4,6 +4,7 @@ import com.example.demo.entities.Appointment;
 import com.example.demo.entities.Doctor;
 import com.example.demo.entities.Patient;
 import com.example.demo.entities.Room;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -19,6 +20,9 @@ import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * EntityUnitTest
+ */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @TestInstance(Lifecycle.PER_CLASS)
@@ -37,104 +41,79 @@ class EntityUnitTest {
     private Appointment a2;
     private Appointment a3;
 
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+
+    @BeforeEach
+    void setup() {
+        d1 = createAndPersistDoctor("Gisselle", "Montenegro", 30, "gisselle@gmail.com");
+        r1 = createAndPersistRoom("Room 1");
+        p1 = createAndPersistPatient("Guillermo", "Santisteban", 30, "guillermosg28@gmail.com");
+    }
+
     /**
      * Method under test: {@link Patient#Patient()}
      */
     @Test
-    void testPatientEntity() {
-        p1 = new Patient("Guillermo", "Santisteban", 30, "guillermosg28@gmail.com");
-
-        Patient savePatient = entityManager.persistAndFlush(p1);
-
-        Patient findPatient = entityManager.find(Patient.class, savePatient.getId());
-
-        assertEquals("Guillermo", findPatient.getFirstName());
-        assertEquals("Santisteban", findPatient.getLastName());
-        assertEquals(30, findPatient.getAge());
-        assertEquals("guillermosg28@gmail.com", findPatient.getEmail());
+    void testEntityPatient() {
+        assertEquals("Guillermo", p1.getFirstName());
+        assertEquals("Santisteban", p1.getLastName());
+        assertEquals(30, p1.getAge());
+        assertEquals("guillermosg28@gmail.com", p1.getEmail());
     }
 
     /**
      * Method under test: {@link Doctor#Doctor()}
      */
     @Test
-    void testDoctorEntity() {
-        d1 = new Doctor("Gisselle", "Montenegro", 30, "gisselle@gmail.com");
-
-        Doctor saveDoctor = entityManager.persistAndFlush(d1);
-
-        Doctor findDoctor = entityManager.find(Doctor.class, saveDoctor.getId());
-
-        assertEquals("Gisselle", findDoctor.getFirstName());
-        assertEquals("Montenegro", findDoctor.getLastName());
-        assertEquals(30, findDoctor.getAge());
-        assertEquals("gisselle@gmail.com", findDoctor.getEmail());
+    void testEntityDoctor() {
+        assertEquals("Gisselle", d1.getFirstName());
+        assertEquals("Montenegro", d1.getLastName());
+        assertEquals(30, d1.getAge());
+        assertEquals("gisselle@gmail.com", d1.getEmail());
     }
 
     /**
      * Method under test: {@link Room#Room()}
      */
     @Test
-    void testRoomEntity() {
-        r1 = new Room("Room 1");
-
-        Room saveRoom = entityManager.persistAndFlush(r1);
-
-        Room findRoom = entityManager.find(Room.class, saveRoom.getRoomName());
-
-        assertEquals("Room 1", findRoom.getRoomName());
+    void testEntityRoom() {
+        assertEquals("Room 1", r1.getRoomName());
     }
 
     @Test
-    void testAppointmentEntity() {
-        p1 = new Patient("Guillermo", "Santisteban", 30, "guillermosg28@gmail.com");
-        d1 = new Doctor("Gisselle", "Montenegro", 30, "gisselle@gmail.com");
-        r1 = new Room("Room 1");
-        Room r2 = new Room("Room 2");
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
-
+    void testEntityAppointment() {
         LocalDateTime startsAt = LocalDateTime.parse("19:30 16/10/2023", formatter);
         LocalDateTime finishesAt = LocalDateTime.parse("20:00 16/10/2023", formatter);
         LocalDateTime startsAt2 = LocalDateTime.parse("19:30 16/10/2023", formatter);
         LocalDateTime finishesAt2 = LocalDateTime.parse("20:00 16/10/2023", formatter);
-
         LocalDateTime startsAt3 = LocalDateTime.parse("19:30 16/10/2023", formatter);
         LocalDateTime finishesAt3 = LocalDateTime.parse("20:00 16/10/2023", formatter);
 
+        Room r2 = new Room("Room 2");
 
-        a1 = new Appointment(p1, d1, r1, startsAt, finishesAt);
-        a2 = new Appointment(p1, d1, r2, startsAt2, finishesAt2);
-        a3 = new Appointment(p1, d1, r1, startsAt3, finishesAt3);
+        a1 = createAndPersistAppointment(p1, d1, r1, startsAt, finishesAt);
+        a2 = createAndPersistAppointment(p1, d1, r2, startsAt2, finishesAt2);
+        a3 = createAndPersistAppointment(p1, d1, r1, startsAt3, finishesAt3);
 
-        Appointment saveAppointment = entityManager.persistAndFlush(a1);
-        Appointment saveAppointment2 = entityManager.persistAndFlush(a2);
-        Appointment saveAppointment3 = entityManager.persistAndFlush(a3);
+        assertEquals(p1, a1.getPatient());
+        assertEquals(d1, a1.getDoctor());
+        assertEquals(r1, a1.getRoom());
+        assertEquals(startsAt, a1.getStartsAt());
+        assertEquals(finishesAt, a1.getFinishesAt());
 
-        Appointment findAppointment = entityManager.find(Appointment.class, saveAppointment.getId());
-        Appointment findAppointment2 = entityManager.find(Appointment.class, saveAppointment2.getId());
-        Appointment findAppointment3 = entityManager.find(Appointment.class, saveAppointment3.getId());
+        assertEquals(p1, a2.getPatient());
+        assertEquals(d1, a2.getDoctor());
+        assertEquals(r2, a2.getRoom());
+        assertEquals(startsAt2, a2.getStartsAt());
+        assertEquals(finishesAt2, a2.getFinishesAt());
 
-        assertEquals(p1, findAppointment.getPatient());
-        assertEquals(d1, findAppointment.getDoctor());
-        assertEquals(r1, findAppointment.getRoom());
-        assertEquals(startsAt, findAppointment.getStartsAt());
-        assertEquals(finishesAt, findAppointment.getFinishesAt());
-
-        assertEquals(p1, findAppointment2.getPatient());
-        assertEquals(d1, findAppointment2.getDoctor());
-        assertEquals(r2, findAppointment2.getRoom());
-        assertEquals(startsAt2, findAppointment2.getStartsAt());
-        assertEquals(finishesAt2, findAppointment2.getFinishesAt());
-
-        assertEquals(p1, findAppointment3.getPatient());
-        assertEquals(d1, findAppointment3.getDoctor());
-        assertEquals(r1, findAppointment3.getRoom());
-        assertEquals(startsAt3, findAppointment3.getStartsAt());
-        assertEquals(finishesAt3, findAppointment3.getFinishesAt());
+        assertEquals(p1, a3.getPatient());
+        assertEquals(d1, a3.getDoctor());
+        assertEquals(r1, a3.getRoom());
+        assertEquals(startsAt3, a3.getStartsAt());
+        assertEquals(finishesAt3, a3.getFinishesAt());
 
         assertFalse(a1.overlaps(a2));
-
         assertTrue(a1.overlaps(a3));
 
     }
@@ -144,50 +123,17 @@ class EntityUnitTest {
      */
     @Test
     void testOverlaps() {
-        Doctor doctor = new Doctor();
-        doctor.setAge(30);
-        doctor.setEmail("guillermo@gmail.com");
-        doctor.setFirstName("Guillermo");
-        doctor.setId(1L);
-        doctor.setLastName("Santisteban");
+        Doctor doctor2 = createAndPersistDoctor("Doctor 2", "Apellidos", 30, "doctor2@gmail.com");
+        Patient patient2 = createAndPersistPatient("Paciente 2", "Apellido 2", 25, "paciente2@gmail.com");
+        Room room2 = createAndPersistRoom("Sala 1");
 
-        Patient patient = new Patient();
-        patient.setAge(28);
-        patient.setEmail("gisselle@gmail.com");
-        patient.setFirstName("Gisselle");
-        patient.setId(1L);
-        patient.setLastName("Montenegro");
+        LocalDateTime startsAt = LocalDateTime.of(2023, 10, 16, 0, 0);
+        LocalDateTime finishesAt = LocalDateTime.of(2023, 10, 16, 0, 30);
 
-        Appointment appointment = new Appointment();
-        appointment.setDoctor(doctor);
-        appointment.setFinishesAt(LocalDate.of(2023, 10, 16).atStartOfDay());
-        appointment.setId(1L);
-        appointment.setPatient(patient);
-        appointment.setRoom(new Room());
-        appointment.setStartsAt(LocalDate.of(2023, 10, 16).atStartOfDay());
+        a1 = createAndPersistAppointment(p1, d1, r1, startsAt, finishesAt);
+        a2 = createAndPersistAppointment(patient2, doctor2, room2, startsAt, finishesAt);
 
-        Doctor doctor2 = new Doctor();
-        doctor2.setAge(30);
-        doctor2.setEmail("doctor2@gmail.com");
-        doctor2.setFirstName("Doctor 2");
-        doctor2.setId(1L);
-        doctor2.setLastName("Apellidos");
-
-        Patient patient2 = new Patient();
-        patient2.setAge(25);
-        patient2.setEmail("paciente2@gmail.com");
-        patient2.setFirstName("Paciente 2");
-        patient2.setId(1L);
-        patient2.setLastName("Apellido 2");
-
-        Appointment appointment2 = new Appointment();
-        appointment2.setDoctor(doctor2);
-        appointment2.setFinishesAt(LocalDate.of(2023, 10, 16).atStartOfDay());
-        appointment2.setId(1L);
-        appointment2.setPatient(patient2);
-        appointment2.setRoom(new Room("Sala 1"));
-        appointment2.setStartsAt(LocalDate.of(2023, 10, 16).atStartOfDay());
-        assertFalse(appointment.overlaps(appointment2));
+        assertFalse(a1.overlaps(a2));
     }
 
     /**
@@ -195,50 +141,22 @@ class EntityUnitTest {
      */
     @Test
     void testOverlaps2() {
-        Doctor doctor = new Doctor();
-        doctor.setAge(30);
-        doctor.setEmail("guillermo@gmail.com");
-        doctor.setFirstName("Guillermo");
-        doctor.setId(1L);
-        doctor.setLastName("Santisteban");
+        Room room2 = createAndPersistRoom("Sala 1");
 
-        Patient patient = new Patient();
-        patient.setAge(28);
-        patient.setEmail("gisselle@gmail.com");
-        patient.setFirstName("Gisselle");
-        patient.setId(1L);
-        patient.setLastName("Montenegro");
+        LocalDateTime startsAt = LocalDateTime.of(2023, 10, 16, 0, 0);
+        LocalDateTime finishesAt = LocalDateTime.of(2023, 10, 16, 0, 30);
 
-        Appointment appointment = new Appointment();
-        appointment.setDoctor(doctor);
-        appointment.setFinishesAt(LocalDate.of(2023, 10, 16).atStartOfDay());
-        appointment.setId(1L);
-        appointment.setPatient(patient);
-        appointment.setRoom(new Room("Sala 1"));
-        appointment.setStartsAt(LocalDate.of(2023, 10, 16).atStartOfDay());
+        a1 = createAndPersistAppointment(p1, d1, room2, startsAt, finishesAt);
 
-        Doctor doctor2 = new Doctor();
-        doctor2.setAge(30);
-        doctor2.setEmail("doctor2@gmail.com");
-        doctor2.setFirstName("Doctor 2");
-        doctor2.setId(1L);
-        doctor2.setLastName("Apellidos");
+        Doctor doctor2 = createAndPersistDoctor("Doctor 2", "Apellidos", 30, "doctor2@gmail.com");
+        Patient patient2 = createAndPersistPatient("Paciente 2", "Apellido 2", 25, "paciente2@gmail.com");
 
-        Patient patient2 = new Patient();
-        patient2.setAge(25);
-        patient2.setEmail("paciente2@gmail.com");
-        patient2.setFirstName("Paciente 2");
-        patient2.setId(1L);
-        patient2.setLastName("Apellido 2");
+        LocalDateTime startsAt2 = LocalDateTime.of(2023, 10, 16, 0, 0);
+        LocalDateTime finishesAt2 = LocalDateTime.of(2023, 10, 16, 0, 30);
 
-        Appointment appointment2 = new Appointment();
-        appointment2.setDoctor(doctor2);
-        appointment2.setFinishesAt(LocalDate.of(2023, 10, 16).atStartOfDay());
-        appointment2.setId(1L);
-        appointment2.setPatient(patient2);
-        appointment2.setRoom(new Room("Sala 1"));
-        appointment2.setStartsAt(LocalDate.of(2023, 10, 16).atStartOfDay());
-        assertTrue(appointment.overlaps(appointment2));
+        a2 = createAndPersistAppointment(patient2, doctor2, room2, startsAt2, finishesAt2);
+
+        assertTrue(a1.overlaps(a2));
     }
 
     /**
@@ -246,49 +164,75 @@ class EntityUnitTest {
      */
     @Test
     void testOverlaps3() {
-        Doctor doctor = new Doctor();
-        doctor.setAge(30);
-        doctor.setEmail("guillermo@gmail.com");
-        doctor.setFirstName("Guillermo");
-        doctor.setId(1L);
-        doctor.setLastName("Santisteban");
+        LocalDateTime startsAt = LocalDate.now().atStartOfDay();
+        LocalDateTime finishesAt = LocalDate.of(2023, 10, 16).atStartOfDay();
 
-        Patient patient = new Patient();
-        patient.setAge(28);
-        patient.setEmail("gisselle@gmail.com");
-        patient.setFirstName("Gisselle");
-        patient.setId(1L);
-        patient.setLastName("Montenegro");
+        a1 = createAndPersistAppointment(p1, d1, r1, startsAt, finishesAt);
 
-        Appointment appointment = new Appointment();
-        appointment.setDoctor(doctor);
-        appointment.setFinishesAt(LocalDate.of(2023, 10, 16).atStartOfDay());
-        appointment.setId(1L);
-        appointment.setPatient(patient);
-        appointment.setRoom(new Room("Sala 1"));
-        appointment.setStartsAt(LocalDate.now().atStartOfDay());
+        Doctor doctor2 = createAndPersistDoctor("Doctor 2", "Apellidos", 30, "doctor2@gmail.com");
+        Patient patient2 = createAndPersistPatient("Paciente 2", "Apellido 2", 25, "paciente2@gmail.com");
 
-        Doctor doctor2 = new Doctor();
-        doctor2.setAge(30);
-        doctor2.setEmail("doctor2@gmail.com");
-        doctor2.setFirstName("Doctor 2");
-        doctor2.setId(1L);
-        doctor2.setLastName("Apellidos");
+        LocalDateTime startsAt2 = LocalDate.of(2023, 10, 16).atStartOfDay();
+        LocalDateTime finishesAt2 = finishesAt;
 
-        Patient patient2 = new Patient();
-        patient2.setAge(25);
-        patient2.setEmail("paciente2@gmail.com");
-        patient2.setFirstName("Paciente 2");
-        patient2.setId(1L);
-        patient2.setLastName("Apellido 2");
+        a2 = createAndPersistAppointment(patient2, doctor2, r1, startsAt2, finishesAt2);
 
-        Appointment appointment2 = new Appointment();
-        appointment2.setDoctor(doctor2);
-        appointment2.setFinishesAt(LocalDate.of(2023, 10, 16).atStartOfDay());
-        appointment2.setId(1L);
-        appointment2.setPatient(patient2);
-        appointment2.setRoom(new Room("Sala 1"));
-        appointment2.setStartsAt(LocalDate.of(2023, 10, 16).atStartOfDay());
-        assertTrue(appointment.overlaps(appointment2));
+        assertTrue(a1.overlaps(a2));
     }
+
+
+    /**
+     * Crea y persiste un objeto Doctor en la base de datos.
+     *
+     * @param firstName El nombre del doctor.
+     * @param lastName  El apellido del doctor.
+     * @param age       La edad del doctor.
+     * @param email     El correo electrónico del doctor.
+     * @return El objeto Doctor creado y persistido.
+     */
+    private Doctor createAndPersistDoctor(String firstName, String lastName, int age, String email) {
+        Doctor doctor = new Doctor(firstName, lastName, age, email);
+        return entityManager.persistAndFlush(doctor);
+    }
+
+    /**
+     * Crea y persiste un objeto Patient en la base de datos.
+     *
+     * @param firstName El nombre del paciente.
+     * @param lastName  El apellido del paciente.
+     * @param age       La edad del paciente.
+     * @param email     El correo electrónico del paciente.
+     * @return El objeto Patient creado y persistido.
+     */
+    private Patient createAndPersistPatient(String firstName, String lastName, int age, String email) {
+        Patient patient = new Patient(firstName, lastName, age, email);
+        return entityManager.persistAndFlush(patient);
+    }
+
+    /**
+     * Crea y persiste un objeto Room en la base de datos.
+     *
+     * @param roomName El nombre de la habitación.
+     * @return El objeto Room creado y persistido.
+     */
+    private Room createAndPersistRoom(String roomName) {
+        Room room = new Room(roomName);
+        return entityManager.persistAndFlush(room);
+    }
+
+    /**
+     * Crea y persiste un objeto Appointment en la base de datos.
+     *
+     * @param patient     El paciente para la cita.
+     * @param doctor      El doctor para la cita.
+     * @param room        La habitación para la cita.
+     * @param startsAt    La fecha y hora de inicio de la cita.
+     * @param finishesAt  La fecha y hora de finalización de la cita.
+     * @return El objeto Appointment creado y persistido.
+     */
+    private Appointment createAndPersistAppointment(Patient patient, Doctor doctor, Room room, LocalDateTime startsAt, LocalDateTime finishesAt) {
+        Appointment appointment = new Appointment(patient, doctor, room, startsAt, finishesAt);
+        return entityManager.persistAndFlush(appointment);
+    }
+
 }
